@@ -2,7 +2,7 @@ ALL: lexer.o
 LEXER_TEST: lexer_test
 
 lexer_test: test.c lexer.o
-	gcc test.c lexer.o -o lexer_test
+	gcc test_lexer.c lexer.o -o lexer_test
 
 lexer.o: lexer.c
 	gcc -c lexer.c
