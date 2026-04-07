@@ -1,0 +1,13 @@
+{
+    "name": "Alice", 
+    "age": 30,
+    "ok": true,
+    "score": 3.14,
+    "arr": [1, 2, 3],
+    "nothing": null,
+    "object": 
+    {
+        "a": 1,
+        "b": 2
+    }
+}
