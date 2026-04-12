@@ -67,4 +67,10 @@ Token *tokenize(Lexer *l);
 //      node of token linklist.
 void print_tokens(Token *head);
 
+//free the lexer
+void lexer_free(Lexer *l);
+
+//free the token linklist
+void token_free(Token *t);
+
 #endif

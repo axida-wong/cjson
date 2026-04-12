@@ -30,9 +30,12 @@ static int load_jsonfile(char *filename, buffer *buf)
         return -1;
     }
     fseek(fp, 0, SEEK_SET);
+    size_t readn = fread(*buf, 1, buf_size, fp);
+    if(readn != buf_size)
+    {
+        fprintf(stderr, "read file error\n");
+    }
     *(*buf + buf_size) = '\0'; 
-
-    fread(*buf, 1, buf_size, fp);
     fclose(fp);
 
     return 0;
@@ -58,8 +61,11 @@ static char *get_token_string(Lexer *l)
 {
     l->pos++;
     int start = l->pos;
-    while(l->src[l->pos] != '\"')
-        l->pos++;
+    while(l->src[l->pos] != '\"' && l->src[l->pos] != '\0')
+        if(l->src[l->pos] == '\\' && l->src[l->pos + 1] != '\0')
+            l->pos += 2;
+        else
+            l->pos++;
     int cnt = l->pos - start; // 算出长度
     l->pos = start; //恢复开头
     //reading process
@@ -75,6 +81,7 @@ static char *get_token_string(Lexer *l)
 static Token *get_token_keyword(Lexer *l)
 {
     Token *t = (Token *)malloc(sizeof(struct token ));
+    t->next = NULL;
     switch (l->src[l->pos])
     {
     case 'n':
@@ -98,7 +105,7 @@ static Token *get_token_keyword(Lexer *l)
         }
         else 
         {
-            fprintf(stderr, "The format of json file is not corret 555.\n");
+            fprintf(stderr, "The format of json file is not corret .\n");
             exit(EXIT_FAILURE);
         }
         break;
@@ -166,8 +173,7 @@ static Token *char_analyzie(Lexer *l)
     case 'n':
     case 't':
     case 'f':
-        free(tmp);
-        tmp = get_token_keyword(l);
+        return get_token_keyword(l);
         break;
     default:
         if(isdigit(l->src[l->pos]) == true || l->src[l->pos] == '-')
@@ -271,3 +277,20 @@ void print_tokens(Token *head)
     }
 }
 
+void lexer_free(Lexer *l)
+{
+    free(l->src);
+}
+
+void token_free(Token *t)
+{
+    Token *tmp;
+    while(t != NULL)
+    {
+        tmp = t->next;
+        if(t->tag == TOKEN_STRING && t->str != NULL)
+            free(t->str);
+        free(t);
+        t = tmp;
+    }
+}

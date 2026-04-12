@@ -43,4 +43,6 @@ void print_array(JsonValue *j);
 //print the jsonvalue recursivly
 void print_value(JsonValue *j);
 
+//free the jsonvalue AST
+void jsonvalue_free(JsonValue *jv);
 #endif

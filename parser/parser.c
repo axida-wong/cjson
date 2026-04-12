@@ -10,76 +10,132 @@ void parser_init(Parser *p, Token *t)
     p->t = t;
 }
 
-JsonValue *parser_object(Parser *p)
+static JsonValue *new_value(enum JSONVALUE_TAG tag)
+{
+    JsonValue *j = (JsonValue *)malloc(sizeof(struct jsonvalue));
+    j->tag = tag;
+    j->next = NULL;
+    return j;
+}
+
+static bool is_eof(Token *t)
+{
+    return t->tag == TOKEN_EOF;
+}
+
+static void parser_forward(Parser *p)
 {
     p->t = p->t->next;
-    if(p->t->tag == TOKEN_NULL)
-        return NULL;
+}
 
-    JsonValue *j = (JsonValue *)malloc(sizeof(struct jsonvalue ));
-    j->tag = JSON_OBJECT;
-    Object dummy;
+JsonValue *parser_object(Parser *p)
+{
+    parser_forward(p);
+    if(is_eof(p->t))
+    {
+        fprintf(stderr, "Format of the json file is wrong.%d\n", p->t->tag);
+        exit(EXIT_FAILURE);
+    }
+    if(p->t->tag == TOKEN_RBRACE)
+    {
+        JsonValue *j = new_value(JSON_OBJECT);
+        j->obj = NULL;
+        parser_forward(p);
+        return  j;
+    }
+
+    JsonValue *j = new_value(JSON_OBJECT);
+    Object dummy; // set dummy head node
+    dummy.next = NULL;
     Object *tmp_obj = &dummy;
 
-    while(p->t->tag != TOKEN_RBRACE)
+    while(true)
     {
         if(p->t->tag == TOKEN_STRING && p->t->next->tag == TOKEN_COLON)
         {
             tmp_obj->next = (Object *)malloc(sizeof(struct object ));
             tmp_obj = tmp_obj->next;
             tmp_obj->key = p->t->str;
-            p->t = p->t->next->next;
+            parser_forward(p);
+            parser_forward(p);
             tmp_obj->jv = parser_value(p);
             tmp_obj->next = NULL;
         }
         else
         {
-            fprintf(stderr, "Fortmat of the json file is wrong.");
-            printf("%d", p->t->tag);
-            return NULL;
+            fprintf(stderr, "Format of the json file is wrong.%d\n", p->t->tag);
+            exit(EXIT_FAILURE);
         }
 
         if(p->t->tag == TOKEN_COMMA)
-            p->t = p->t->next;
+            parser_forward(p);
+        else if(p->t->tag == TOKEN_RBRACE)
+        {
+            parser_forward(p);
+            break;
+        }
+        else
+        {
+            fprintf(stderr, "Format of the json file is wrong.%d\n", p->t->tag);
+            exit(EXIT_FAILURE);
+        }
     }
     j->obj = dummy.next;
-
-    p->t = p->t->next;
 
     return j;
 }
 
 JsonValue *parser_array(Parser *p)
 {
-    p->t = p->t->next;
-    if(p->t->tag == TOKEN_NULL)
-        return NULL;
+    parser_forward(p);
+    if(p->t->tag == TOKEN_EOF)
+    {
+        fprintf(stderr, "Format of the json file is wrong.%d\n", p->t->tag);
+        exit(EXIT_FAILURE);
+    }
+    if(p->t->tag == TOKEN_RBRACKET)
+    {
+        JsonValue *j = new_value(JSON_ARRAY);
+        // JsonValue *j = malloc(sizeof(struct jsonvalue));
+        // j->tag = JSON_ARRAY;
+        j->arr = NULL;
+        parser_forward(p);
+        return  j;
+    }
 
-    JsonValue *j = (JsonValue *)malloc(sizeof(struct jsonvalue ));
-    j->tag = JSON_ARRAY;
-    Array dummy;
+    JsonValue *j = new_value(JSON_ARRAY);
+    Array dummy; // set dummy header node
+    dummy.next = NULL;
     Array *tmp_arr = &dummy;
 
-    while(p->t->tag != TOKEN_RBRACKET)
+    while(true)
     {
         tmp_arr->next = (Array *)malloc(sizeof(struct array));
         tmp_arr = tmp_arr->next;
+        tmp_arr->next = NULL;
         tmp_arr->elem = parser_value(p);
-        if(p->t->tag == TOKEN_COMMA)
-            p->t = p->t->next;
+
+        if(p->t->tag == TOKEN_COMMA) 
+            parser_forward(p);
+        else if(p->t->tag == TOKEN_RBRACKET)
+        {
+            parser_forward(p);
+            break;
+        }
+        else
+        {
+            fprintf(stderr, "Format of the json file is wrong.%d\n", p->t->tag);
+            exit(EXIT_FAILURE);
+        }
     }
     j->arr = dummy.next;
-    p->t = p->t->next;
 
     return j;
 }
 
 JsonValue *parser_value(Parser *p)
 {
-    if(p->t->tag == TOKEN_NULL)
-        return NULL;
-
-    JsonValue *jv = (JsonValue *)malloc(sizeof(struct jsonvalue ));
+    JsonValue *jv = NULL;
     switch(p->t->tag)
     {
     case TOKEN_LBRACE:
@@ -89,27 +145,30 @@ JsonValue *parser_value(Parser *p)
         jv = parser_array(p);
         break;
     case TOKEN_NUMBER:
-        jv->tag = JSON_NUMBER;
+        jv = new_value(JSON_NUMBER);
         jv->num = p->t->num;
-        p->t = p->t->next;
+        parser_forward(p);
         break;
     case TOKEN_STRING:
-        jv->tag = JSON_STRING;
+        jv = new_value(JSON_STRING);
         jv->str = p->t->str;
-        p->t = p->t->next;
+        parser_forward(p);
         break;
     case TOKEN_BOOL:
-        jv->tag = JSON_BOOL;
+        jv = new_value(JSON_BOOL);
         jv->boolean = p->t->b;
-        p->t = p->t->next;
+        parser_forward(p);
         break;
     case TOKEN_NULL: 
-        p->t = p->t->next;
-        jv->tag = JSON_NULL;
+        jv = new_value(JSON_NULL);
         jv->null = NULL;
+        parser_forward(p);
         break;
+    // case TOKEN_EOF:
+    default:
+        fprintf(stderr, "Unexpectted token: %d\n", p->t->tag);
+        exit(EXIT_FAILURE);
     }
-    jv->next = NULL;
 
     return jv;
 }
@@ -167,3 +226,39 @@ void print_value(JsonValue *j)
         break;
     }
 }
+
+void jsonvalue_free(JsonValue *jv)
+{
+    if(!jv)
+        return ;
+    switch (jv->tag)
+    {
+    case JSON_ARRAY:
+    {
+        Array *cur = jv->arr;
+        while(!cur)
+        {
+            Array *tmp = cur->next;
+            jsonvalue_free(cur->elem);
+            free(cur);
+            cur = tmp;
+        }
+    }
+    case JSON_OBJECT:
+    {
+        Object *cur = jv->obj;
+        while(!cur)
+        {
+            Object *tmp = cur->next;
+            jsonvalue_free(cur->jv);
+            free(cur);
+            cur = tmp;
+        }
+    }
+    break;
+    default:
+        break;
+    }
+    free(jv);
+}
+

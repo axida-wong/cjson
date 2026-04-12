@@ -20,6 +20,9 @@ int main(int argc, char *argv[])
     parser_init(&p, t_head);
     JsonValue *jv = parser_value(&p);
     print_value(jv);
+    lexer_free(&l);
+    token_free(t_head);
+    jsonvalue_free(jv);
     
     return 0;
 }
