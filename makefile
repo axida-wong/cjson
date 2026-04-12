@@ -1,4 +1,4 @@
-ALL: cjson.o
+ALL: test
 LEXER_TEST: lexer_test
 PARSER_TEST: parser_test
 
@@ -10,8 +10,11 @@ RM = rm -f
 EXE = lexer_test parser_test 
 endif
 
-cjson.o: cjson.c ./parser/parser.o ./lexer/lexer.o
-	gcc -c lexer.c -o cjson.o
+test: test.c cjson.o ./parser/parser.o ./lexer/lexer.o 
+	gcc -o test test.c cjson.o ./parser/parser.o ./lexer/lexer.o 
+
+cjson.o: cjson.c 
+	gcc -c cjson.c
 
 lexer_test:  
 	$(MAKE) -C lexer lexer_test

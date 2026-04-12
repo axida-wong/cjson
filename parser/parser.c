@@ -55,7 +55,8 @@ JsonValue *parser_object(Parser *p)
         {
             tmp_obj->next = (Object *)malloc(sizeof(struct object ));
             tmp_obj = tmp_obj->next;
-            tmp_obj->key = p->t->str;
+            // tmp_obj->key = p->t->str;
+            tmp_obj->key = strdup(p->t->str);
             parser_forward(p);
             parser_forward(p);
             tmp_obj->jv = parser_value(p);
@@ -151,7 +152,8 @@ JsonValue *parser_value(Parser *p)
         break;
     case TOKEN_STRING:
         jv = new_value(JSON_STRING);
-        jv->str = p->t->str;
+        // jv->str = p->t->str;
+        jv->str = strdup(p->t->str);
         parser_forward(p);
         break;
     case TOKEN_BOOL:

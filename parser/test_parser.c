@@ -19,9 +19,9 @@ int main(int argc, char *argv[])
     Parser p;
     parser_init(&p, t_head);
     JsonValue *jv = parser_value(&p);
-    print_value(jv);
     lexer_free(&l);
     token_free(t_head);
+    print_value(jv);
     jsonvalue_free(jv);
     
     return 0;

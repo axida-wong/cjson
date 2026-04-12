@@ -8,6 +8,10 @@
 #include "./parser/parser.h"
 #include "./lexer/lexer.h"
 
+JsonValue *jsonvalue_parse(char *filename);
 
+extern void jsonvalue_free(JsonValue *jv);
 
+void js_pretty_print(JsonValue *jv);
+    
 #endif
