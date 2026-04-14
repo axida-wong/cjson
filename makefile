@@ -1,6 +1,6 @@
-ALL: test
-LEXER_TEST: lexer_test
-PARSER_TEST: parser_test
+.PHONY: all parser lexer clean lexer_test parser_test
+CC = gcc
+all: test
 
 ifeq ($(OS), Windows_NT)
 RM = del 
@@ -10,11 +10,14 @@ RM = rm -f
 EXE = lexer_test parser_test 
 endif
 
-test: test.c cjson.o ./parser/parser.o ./lexer/lexer.o 
-	gcc -o test test.c cjson.o ./parser/parser.o ./lexer/lexer.o 
+test: test.o cjson.o ./parser/parser.o ./lexer/lexer.o
+	$(CC) -o test test.o cjson.o ./parser/parser.o ./lexer/lexer.o 
+
+test.o: test.c
+	$(CC) -c test.c
 
 cjson.o: cjson.c 
-	gcc -c cjson.c
+	$(CC) -c cjson.c
 
 lexer_test:  
 	$(MAKE) -C lexer lexer_test
@@ -22,10 +25,10 @@ lexer_test:
 parser_test: 
 	$(MAKE) -C parser parser_test
 
-./lexer/lexer.o: 
+lexer: 
 	$(MAKE) -C lexer
 
-./parser/parser.o: 
+parser:
 	$(MAKE) -C parser
 
 clean: 

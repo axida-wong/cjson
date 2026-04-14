@@ -191,89 +191,60 @@ static void print_depth(int depth)
 void print_object(JsonValue *j, int depth)
 {
     Object *o = j->obj;
-    print_depth(depth - 1);
-    printf("{\n");
+    // printf("{\n");
     while(o)
     {
         print_depth(depth);
-        printf("%s: ", o->key);
+        printf("\"%s\": ", o->key);
         pretty_recurse_print(o->jv, depth);
         if(o->next != NULL)
             putchar(',');
         putchar('\n');
         o = o->next;
     }
-    printf("}\n");
+    // print_depth(depth - 1);
+    // printf("}");
 }
 
 void print_array(JsonValue *j, int depth)
 {
     Array *a = j->arr;
-    print_depth(depth);
-    printf("[\n");
+    printf("[");
     while(a)
     {
         pretty_recurse_print(a->elem, depth+1);
         if(a->next != NULL)
-            putchar(',');
-        putchar('\n');
+            printf(", ");
+        // putchar('\n');
         a = a->next;
     }
-    print_depth(depth);
-    printf("]\n");
-}
-
-void print_value(JsonValue *j)
-{   
-    switch (j->tag)
-    {
-    case JSON_NULL:
-        printf(" null,\n");
-        break;
-    case JSON_BOOL:
-        printf(" %s,", j->boolean ? "true": "false");
-        break;
-    case JSON_NUMBER:
-        printf(" %g,", j->num);
-        break;
-    case JSON_STRING:
-        printf(" \"%s\",", j->str);
-        break;
-    case JSON_ARRAY:
-        print_array(j, 0);
-        break;
-    case JSON_OBJECT:
-        print_object(j, 0);
-        break;
-    default:
-        break;
-    }
+    printf("]");
 }
 
 static void pretty_recurse_print(JsonValue *j, int depth)
 {   
-    for(int i = 0; i < depth; i++)
-        printf("    ");
-
     switch (j->tag)
     {
     case JSON_NULL:
         printf(" null");
         break;
     case JSON_BOOL:
-        printf(" %s", j->boolean ? "true": "false");
+        printf("%s", j->boolean ? "true": "false");
         break;
     case JSON_NUMBER:
-        printf(" %g", j->num);
+        printf("%g", j->num);
         break;
     case JSON_STRING:
-        printf(" \"%s\"", j->str);
+        printf("\"%s\"", j->str);
         break;
     case JSON_ARRAY:
         print_array(j, depth + 1);
         break;
     case JSON_OBJECT:
+        printf("{\n");
         print_object(j, depth + 1);
+        print_depth(depth);
+        printf("}");
         break;
     default:
         break;
