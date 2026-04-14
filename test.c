@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
     }
     JsonValue *j;
     j = jsonvalue_parse(argv[1]);
-    print_value(j);
+    // print_value(j);
+    pretty_print(j);
     jsonvalue_free(j);
     return 0;
 }

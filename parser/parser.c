@@ -5,6 +5,12 @@
 #include "../jsonvalue.h"
 #include "parser.h"
 
+static bool is_eof(Token *t);
+static void parser_forward(Parser *p);
+static JsonValue *new_value(enum JSONVALUE_TAG tag);
+static void print_depth(int depth);
+static void pretty_recurse_print(JsonValue *j, int depth);
+
 void parser_init(Parser *p, Token *t)
 {
     p->t = t;
@@ -27,6 +33,7 @@ static void parser_forward(Parser *p)
 {
     p->t = p->t->next;
 }
+
 
 JsonValue *parser_object(Parser *p)
 {
@@ -175,30 +182,44 @@ JsonValue *parser_value(Parser *p)
     return jv;
 }
 
-void print_object(JsonValue *j)
+static void print_depth(int depth)
+{
+    for(int i = 0; i < depth; i++)
+        printf("    ");
+}
+
+void print_object(JsonValue *j, int depth)
 {
     Object *o = j->obj;
+    print_depth(depth - 1);
     printf("{\n");
     while(o)
     {
-        printf("\t");
+        print_depth(depth);
         printf("%s: ", o->key);
-        print_value(o->jv);
+        pretty_recurse_print(o->jv, depth);
+        if(o->next != NULL)
+            putchar(',');
+        putchar('\n');
         o = o->next;
     }
     printf("}\n");
 }
 
-void print_array(JsonValue *j)
+void print_array(JsonValue *j, int depth)
 {
     Array *a = j->arr;
+    print_depth(depth);
     printf("[\n");
     while(a)
     {
-        printf("\t");
-        print_value(a->elem);
+        pretty_recurse_print(a->elem, depth+1);
+        if(a->next != NULL)
+            putchar(',');
+        putchar('\n');
         a = a->next;
     }
+    print_depth(depth);
     printf("]\n");
 }
 
@@ -219,25 +240,61 @@ void print_value(JsonValue *j)
         printf(" \"%s\",", j->str);
         break;
     case JSON_ARRAY:
-        print_array(j);
+        print_array(j, 0);
         break;
     case JSON_OBJECT:
-        print_object(j);
+        print_object(j, 0);
         break;
     default:
         break;
     }
 }
 
-void jsonvalue_free(JsonValue *jv)
+static void pretty_recurse_print(JsonValue *j, int depth)
+{   
+    for(int i = 0; i < depth; i++)
+        printf("    ");
+
+    switch (j->tag)
+    {
+    case JSON_NULL:
+        printf(" null");
+        break;
+    case JSON_BOOL:
+        printf(" %s", j->boolean ? "true": "false");
+        break;
+    case JSON_NUMBER:
+        printf(" %g", j->num);
+        break;
+    case JSON_STRING:
+        printf(" \"%s\"", j->str);
+        break;
+    case JSON_ARRAY:
+        print_array(j, depth + 1);
+        break;
+    case JSON_OBJECT:
+        print_object(j, depth + 1);
+        break;
+    default:
+        break;
+    }
+}
+
+void pretty_print(JsonValue *j)
 {
-    if(!jv)
+    //default tab size is 4
+    pretty_recurse_print(j, 0);
+}
+
+void jsonvalue_free(JsonValue *j)
+{
+    if(!j)
         return ;
-    switch (jv->tag)
+    switch (j->tag)
     {
     case JSON_ARRAY:
     {
-        Array *cur = jv->arr;
+        Array *cur = j->arr;
         while(!cur)
         {
             Array *tmp = cur->next;
@@ -248,10 +305,11 @@ void jsonvalue_free(JsonValue *jv)
     }
     case JSON_OBJECT:
     {
-        Object *cur = jv->obj;
+        Object *cur = j->obj;
         while(!cur)
         {
             Object *tmp = cur->next;
+            free(cur->key);
             jsonvalue_free(cur->jv);
             free(cur);
             cur = tmp;
@@ -261,6 +319,5 @@ void jsonvalue_free(JsonValue *jv)
     default:
         break;
     }
-    free(jv);
+    free(j);
 }
-

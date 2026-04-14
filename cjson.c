@@ -20,8 +20,3 @@ JsonValue *jsonvalue_parse(char *filename)
 
     return jv;
 }
-
-void js_pretty_print(JsonValue *jv)
-{
-    ;
-}

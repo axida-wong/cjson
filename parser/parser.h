@@ -35,14 +35,18 @@ JsonValue *parser_array(Parser *p);
 JsonValue *parser_value(Parser *p);
 
 //print the object recursivly
-void print_object(JsonValue *j);
+void print_object(JsonValue *j, int depth);
 
 //print the array recursivly
-void print_array(JsonValue *j);
+void print_array(JsonValue *j, int depth);
 
 //print the jsonvalue recursivly
 void print_value(JsonValue *j);
 
+//pretty print the json AST
+void pretty_print(JsonValue *j);
+
 //free the jsonvalue AST
-void jsonvalue_free(JsonValue *jv);
+void jsonvalue_free(JsonValue *j);
+
 #endif
