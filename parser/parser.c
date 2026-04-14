@@ -198,7 +198,7 @@ void print_object(JsonValue *j, int depth)
         print_depth(depth);
         printf("%s: ", o->key);
         pretty_recurse_print(o->jv, depth);
-        if(o->next != giNULL)
+        if(o->next != NULL)
             putchar(',');
         putchar('\n');
         o = o->next;
