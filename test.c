@@ -15,6 +15,16 @@ int main(int argc, char *argv[])
     j = jsonvalue_parse(argv[1]);
     // print_value(j);
     pretty_print(j);
+    JsonValue *j1 = get_object_value(j, "score");
+    printf("\n%f\n", j1->num);
+    j1 = get_object_value(j, "bullshit");
+    printf("\n%p\n", j1);
+    JsonValue *j2 = get_object_value(j, "arr");
+    print_array(j2, 0);
+    printf("\n%d\n", j2->tag);
+    JsonValue *j3 = get_array_value(j2, 0);
+    printf("\n%d\n", j3->tag);
+    printf("\n%g\n", j3->num);
     jsonvalue_free(j);
     return 0;
 }
