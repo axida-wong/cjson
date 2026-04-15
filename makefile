@@ -11,7 +11,7 @@ EXE = lexer_test parser_test
 endif
 
 test: test.o cjson.o ./parser/parser.o ./lexer/lexer.o
-	$(CC) -o test test.o cjson.o ./parser/parser.o ./lexer/lexer.o 
+	$(CC) -g -o test test.o cjson.o ./parser/parser.o ./lexer/lexer.o 
 
 test.o: test.c
 	$(CC) -c test.c

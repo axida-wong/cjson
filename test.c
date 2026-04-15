@@ -25,6 +25,16 @@ int main(int argc, char *argv[])
     JsonValue *j3 = get_array_value(j2, 0);
     printf("\n%d\n", j3->tag);
     printf("\n%g\n", j3->num);
+    putchar('\n');
+    JsonValue *j4 = get_value(j, "a1", "b1", NULL);
+    pretty_print(j4);
+    putchar('\n');
+    JsonValue *j5 = get_value(j, "a1", "b2", NULL);
+    print_array(j5, 0);
+    putchar('\n');
+    JsonValue *j6 = get_value(j, "a1", "b3", NULL);
+    pretty_print(j6);
+    putchar('\n');
     jsonvalue_free(j);
     return 0;
 }

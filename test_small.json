@@ -2,11 +2,18 @@
     "name": "Alice", 
     "age": 30,
     "ok": true,
+    "a1": {
+        "b1": {
+            "c1": "c1",
+            "c2": "c2"
+        },
+        "b2": ["first", "second", "thrid"],
+        "b3": 45
+    },
     "score": 3.14,
     "arr": [1, 2, 3],
     "nothing": null,
-    "object": 
-    {
+    "object": {
         "a": 1,
         "b": 2
     }

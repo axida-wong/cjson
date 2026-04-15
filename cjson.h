@@ -18,7 +18,7 @@ JsonValue *get_object_value(JsonValue *jv, const char *key);
 
 JsonValue *get_array_value(JsonValue *jv, int index);
 
-JsonValue *get_value(JsonValue *jv, int depth, ...);
+JsonValue *get_value(JsonValue *jv, ...);
 
 JsonValue *create_array();
 

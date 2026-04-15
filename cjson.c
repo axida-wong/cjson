@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "cjson.h"
 #include "jsonvalue.h"
@@ -68,7 +69,23 @@ JsonValue *get_array_value(JsonValue *jv, int index)
         return tmp_arr->elem;
 }
 
-JsonValue *get_value(JsonValue *jv, int depth, ...)
+//get_value(jv, "a1", "b2", NULL)
+JsonValue *get_value(JsonValue *jv, ...)
 {
-    ;
+    if(jv->tag != JSON_OBJECT)
+    {
+            fprintf(stderr, "The type of jv is not json_object.\n");
+            return NULL;
+    }
+    va_list keys;
+    va_start(keys, jv);
+    char *key = va_arg(keys, char *); 
+    JsonValue *value = jv;
+    while(key != NULL)
+    {
+        value = get_object_value(value, key);
+        key = va_arg(keys, char *);
+    }
+
+    return value;
 }
