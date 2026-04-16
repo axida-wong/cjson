@@ -21,7 +21,8 @@ int main(int argc, char *argv[])
     JsonValue *jv = parser_value(&p);
     lexer_free(&l);
     token_free(t_head);
-    print_value(jv);
+//    print_value(jv);
+	pretty_print(jv);
     jsonvalue_free(jv);
     
     return 0;

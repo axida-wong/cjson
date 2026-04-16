@@ -1,6 +1,13 @@
 ALL: parser.o
 CC = gcc
 # PARSER_TEST: parser_test
+ifeq ($(OS), Windows_NT)
+RM = del
+EXE = *.exe
+else
+RM = rm -f
+EXE = parser_test
+endif
 
 parser_test: test_parser.c parser.o ../lexer/lexer.o
 	$(CC) test_parser.c parser.o ../lexer/lexer.o -o parser_test
@@ -12,4 +19,4 @@ parser.o: parser.c
 	$(MAKE) -C ../lexer 
 
 clean: 
-	del *.o *.exe
+	$(RM) *.o $(EXE)

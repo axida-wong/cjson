@@ -7,7 +7,7 @@ RM = del
 EXE = *.exe
 else
 RM = rm -f
-EXE = lexer_test parser_test 
+EXE = test lexer_test parser_test 
 endif
 
 test: test.o cjson.o ./parser/parser.o ./lexer/lexer.o

@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
     Lexer l;
     lexer_init(&l, argv[1]);
     Token *t_head = tokenize(&l);
+    print_tokens(t_head);
     lexer_free(&l);
     token_free(t_head);
-    print_tokens(t_head);
     
     return 0;
 }

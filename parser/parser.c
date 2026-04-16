@@ -255,6 +255,7 @@ void pretty_print(JsonValue *j)
 {
     //default tab size is 4
     pretty_recurse_print(j, 0);
+	putchar('\n');
 }
 
 void jsonvalue_free(JsonValue *j)

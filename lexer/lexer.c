@@ -16,13 +16,13 @@ static int load_jsonfile(char *filename, buffer *buf)
         fprintf(stderr, "can't open the file %s\n", filename);
         return -1;
     }
-    
+
     //fseek and ftell, read all the content of file at one time.
     //SEEK_CUR, current position
     //SEEK_SET, front of the file
     //SEEK_END, end of the file
     fseek(fp, 0, SEEK_END);
-    int buf_size = ftell(fp);
+    long buf_size = ftell(fp);
     *buf = (char *) malloc(sizeof(char ) * (buf_size + 1));
     if(*buf == NULL)
     {
@@ -139,6 +139,7 @@ static double get_token_number(Lexer *l)
 static Token *char_analyzie(Lexer *l)
 {
     Token * tmp = (Token *)malloc(sizeof(struct token ));
+	tmp->next = NULL;
 
     switch (l->src[l->pos])
     {
@@ -175,8 +176,8 @@ static Token *char_analyzie(Lexer *l)
     case 'f':
         return get_token_keyword(l);
         break;
-    default:
-        if(isdigit(l->src[l->pos]) == true || l->src[l->pos] == '-')
+    default: //the return value of isdigit is not (0,1), is 1/2048 or 0
+        if(isdigit(l->src[l->pos]) || l->src[l->pos] == '-')
         {
             tmp->tag = TOKEN_NUMBER;
             tmp->num = get_token_number(l);           
@@ -186,6 +187,8 @@ static Token *char_analyzie(Lexer *l)
             fprintf(stderr, "unexpected char: '%c' ascii=%d dat pos=%d\n",
                 l->src[l->pos], l->src[l->pos], l->pos);
             l->pos++;
+			free(tmp);//here is the garbage token, release memory of the tmp
+			return next_token(l);
         }
         break;
     }
@@ -228,6 +231,11 @@ Token *tokenize(Lexer *l)
 
 void print_tokens(Token *head)
 {
+	if(!head)
+	{
+		fprintf(stderr, "pointer of token is null.\n");
+		return ;
+	}
     // Token is a linklist of tokens
     while(head->tag != TOKEN_EOF)
     {
