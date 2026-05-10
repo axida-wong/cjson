@@ -2,3 +2,9 @@
 
 ---
 
+`make` to compile
+
+check cjson.h to see all the func in cjson
+
+
+
